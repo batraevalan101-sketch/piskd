@@ -16,7 +16,7 @@ import jwt  # PyJWT
 
 logger = logging.getLogger(__name__)
 
-KLING_MODEL    = "kling-v2-master"   # supports Omni Flash mode
+KLING_MODEL    = "KLING_MODEL = "kling-v1""   # supports Omni Flash mode
 KLING_MODE     = "std"               # std | pro
 KLING_BASE_URL = "https://api-singapore.klingai.com"
 
