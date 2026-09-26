@@ -43,8 +43,8 @@ class ProviderFactory:
         c = self.config
         if provider == "seedance" and c.SEEDANCE_API_KEY:
             client = SeedDanceService(c.SEEDANCE_API_KEY, c.SEEDANCE_API_URL)
-        elif provider == "kling" and c.KLING_ACCESS_KEY:
-            client = KlingService(c.KLING_ACCESS_KEY, c.KLING_SECRET_KEY, c.KLING_API_URL)
+        elif provider == "kling" and c.KLING_API_KEY:
+    client = KlingService(api_key=c.KLING_API_KEY)
         elif provider == "luma" and c.LUMA_API_KEY:
             client = LumaService(c.LUMA_API_KEY, c.LUMA_API_URL)
         elif provider == "runway" and c.RUNWAY_API_KEY:
