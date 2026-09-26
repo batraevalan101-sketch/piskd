@@ -5,7 +5,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-KLING_MODEL = "kling-v1"
+KLING_MODEL = "kling-v2-master"
 KLING_MODE = "std"
 KLING_BASE_URL = "https://api-singapore.klingai.com"
 
