@@ -42,6 +42,7 @@ class KlingService:
         self,
         prompt: str,
         duration: int = 5,
+        resolution: str = "720p",
         aspect_ratio: str = "16:9",
         negative_prompt: str = ""
     ) -> Optional[str]:
@@ -60,7 +61,8 @@ class KlingService:
         self,
         prompt: str,
         image_bytes: bytes,
-        duration: int = 5
+        duration: int = 5,
+        resolution: str = "720p",
     ) -> Optional[str]:
         img_b64 = base64.b64encode(image_bytes).decode()
         payload = {
