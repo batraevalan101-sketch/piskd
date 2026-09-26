@@ -35,8 +35,10 @@ class KlingService:
         self.base_url   = base_url or KLING_BASE_URL
 
     def _headers(self) -> dict:
-        token = _make_jwt(self.access_key, self.secret_key)
-        return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    return {
+        "Authorization": f"Bearer {self.access_key}",
+        "Content-Type": "application/json"
+    }
 
     async def generate_text_to_video(
         self,
