@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 KLING_MODEL    = "kling-v2-master"   # supports Omni Flash mode
 KLING_MODE     = "std"               # std | pro
-KLING_BASE_URL = "https://api.klingai.com"
+KLING_BASE_URL = "https://api-singapore.klingai.com"
 
 
 def _make_jwt(access_key: str, secret_key: str) -> str:
