@@ -5,8 +5,6 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-KLING_MODEL = "kling-3.0-turbo"
-KLING_MODE = "std"
 KLING_BASE_URL = "https://api-singapore.klingai.com"
 
 
@@ -47,15 +45,12 @@ class KlingService:
         negative_prompt: str = ""
     ) -> Optional[str]:
         payload = {
-            "model_name": KLING_MODEL,
             "prompt": prompt,
             "negative_prompt": negative_prompt,
-            "cfg_scale": 0.5,
-            "mode": KLING_MODE,
-            "duration": str(duration),
+            "duration": duration,
             "aspect_ratio": aspect_ratio,
         }
-        return await self._submit("/v1/videos/text2video", payload)
+        return await self._submit("/text-to-video/kling-3.0-turbo", payload)
 
     async def generate_image_to_video(
         self,
@@ -66,16 +61,16 @@ class KlingService:
     ) -> Optional[str]:
         img_b64 = base64.b64encode(image_bytes).decode()
         payload = {
-            "model_name": KLING_MODEL,
-            "prompt": prompt,
-            "mode": KLING_MODE,
-            "duration": str(duration),
-            "image": img_b64,
+            "contents": [
+                {"type": "image", "data": img_b64},
+                {"type": "prompt", "text": prompt},
+            ],
+            "duration": duration,
         }
-        return await self._submit("/v1/videos/image2video", payload)
+        return await self._submit("/image-to-video/kling-3.0-turbo", payload)
 
     async def get_status(self, task_id: str, is_image2video: bool = False) -> dict:
-        path = "/v1/videos/image2video" if is_image2video else "/v1/videos/text2video"
+        path = "/image-to-video/kling-3.0-turbo" if is_image2video else "/text-to-video/kling-3.0-turbo"
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
