@@ -11,17 +11,40 @@ KLING_BASE_URL = "https://api-singapore.klingai.com"
 
 
 class KlingService:
-    def __init__(self, access_key: str, secret_key: str, base_url: str):
-        self.access_key = access_key
-        self.base_url = base_url or KLING_BASE_URL
+    def __init__(self, api_key: str, base_url: str = KLING_BASE_URL):
+        self.api_key = api_key
+        self.base_url = base_url
 
     def _headers(self) -> dict:
         return {
-            "Authorization": f"Bearer {self.access_key}",
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
 
-    async def generate_text_to_video(self, prompt: str, duration: int = 5, resolution: str = "720p", aspect_ratio: str = "16:9", negative_prompt: str = "") -> Optional[str]:
+    async def _submit(self, path: str, payload: dict) -> Optional[str]:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.base_url}{path}",
+                    headers=self._headers(),
+                    json=payload,
+                ) as r:
+                    data = await r.json()
+                    logger.info(f"Kling full response: {data}")
+                    task_id = data.get("data", {}).get("task_id")
+                    logger.info(f"Kling task created: {task_id}")
+                    return task_id
+        except Exception as e:
+            logger.error(f"Kling submit error: {e}")
+            return None
+
+    async def generate_text_to_video(
+        self,
+        prompt: str,
+        duration: int = 5,
+        aspect_ratio: str = "16:9",
+        negative_prompt: str = ""
+    ) -> Optional[str]:
         payload = {
             "model_name": KLING_MODEL,
             "prompt": prompt,
@@ -33,7 +56,12 @@ class KlingService:
         }
         return await self._submit("/v1/videos/text2video", payload)
 
-    async def generate_image_to_video(self, prompt: str, image_bytes: bytes, duration: int = 5, resolution: str = "720p") -> Optional[str]:
+    async def generate_image_to_video(
+        self,
+        prompt: str,
+        image_bytes: bytes,
+        duration: int = 5
+    ) -> Optional[str]:
         img_b64 = base64.b64encode(image_bytes).decode()
         payload = {
             "model_name": KLING_MODEL,
@@ -44,12 +72,16 @@ class KlingService:
         }
         return await self._submit("/v1/videos/image2video", payload)
 
-    async def get_status(self, task_id: str) -> dict:
-        url = f"{self.base_url}/v1/videos/text2video/{task_id}"
+    async def get_status(self, task_id: str, is_image2video: bool = False) -> dict:
+        path = "/v1/videos/image2video" if is_image2video else "/v1/videos/text2video"
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=self._headers()) as r:
+                async with session.get(
+                    f"{self.base_url}{path}/{task_id}",
+                    headers=self._headers(),
+                ) as r:
                     data = await r.json()
+                    logger.info(f"Kling status response: {data}")
                     task = data.get("data", {})
                     raw_status = task.get("task_status", "unknown")
                     status_map = {
@@ -68,19 +100,3 @@ class KlingService:
         except Exception as e:
             logger.error(f"Kling get_status error: {e}")
             return {"status": "error", "video_url": None}
-
-    async def _submit(self, path: str, payload: dict) -> Optional[str]:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    f"{self.base_url}{path}",
-                    headers=self._headers(),
-                    json=payload,
-                ) as r:
-                    data = await r.json()
-                    task_id = data.get("data", {}).get("task_id")
-                    logger.info(f"Kling task created: {task_id}")
-                    return task_id
-        except Exception as e:
-            logger.error(f"Kling submit error: {e}")
-            return None
